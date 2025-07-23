@@ -1,14 +1,36 @@
+import { AntDesign, MaterialCommunityIcons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
 
 export default function TabsLayout() {
   return (
-    <Tabs screenOptions={{ tabBarActiveTintColor: '#673ab7', headerShown: false }}>
+    <Tabs screenOptions={{ headerShown: false }}>
       <Tabs.Screen
         name="dashboard"
-        options={{ title: 'Inicio', tabBarLabel: 'Inicio', headerShown: false }}
+        options={{
+          title: 'Inicio',
+          tabBarLabel: 'Inicio',
+          headerShown: false,
+          tabBarIcon: ({ color }) => <AntDesign name="home" size={24} color={color} />,
+        }}
       />
-      {/* <Tabs.Screen name="index" options={{ title: 'Inicio' }} />
-      <Tabs.Screen name="index" options={{ title: 'Inicio' }} /> */}
+      <Tabs.Screen
+        name="mascotas/index"
+        options={{
+          title: 'Mascotas',
+          tabBarLabel: 'Mascotas',
+          headerShown: false,
+          tabBarIcon: ({ color }) => <MaterialCommunityIcons name="dog" size={24} color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="perfil"
+        options={{
+          title: 'Perfil',
+          tabBarLabel: 'Perfil',
+          headerShown: false,
+          tabBarIcon: ({ color }) => <AntDesign name="user" size={24} color={color} />,
+        }}
+      />
     </Tabs>
   );
 }

@@ -1,3 +1,4 @@
+import { AntDesign } from '@expo/vector-icons';
 import { useEffect } from 'react';
 import { View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -14,8 +15,14 @@ export default function Index() {
 
   return (
     <View className="bg-brandLight flex-1">
-      <SafeAreaView>
-        <Text className="font-sofia">Hola dashboard</Text>
+      <SafeAreaView className="p-4">
+        <Text variant="title2" className="font-sofia">
+          Actividad reciente
+        </Text>
+        <View className="h-full items-center justify-center">
+          <AntDesign name="hourglass" size={36} color="black" className="mb-4" />
+          <Text variant="body">Aquí aparecerá tu actividad reciente.</Text>
+        </View>
       </SafeAreaView>
     </View>
   );

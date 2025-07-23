@@ -9,8 +9,6 @@ const authLink = setContext(async (_, { headers }) => {
   // Get the authentication token from local storage if it exists
   const token = await SecureStore.getItemAsync('accessToken');
   const refreshToken = await SecureStore.getItemAsync('refreshToken');
-  console.log('Token:', token);
-  console.log('Refresh Token:', refreshToken);
   // Return the headers to the context so httpLink can read them
   return {
     headers: {
@@ -21,7 +19,6 @@ const authLink = setContext(async (_, { headers }) => {
     },
   };
 });
-console.log('API URL:', apiUrl);
 const uploadLink = createUploadLink({
   uri: `${apiUrl || 'http://localhost:4000'}/graphql`,
   headers: {

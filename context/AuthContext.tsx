@@ -79,7 +79,6 @@ export const AuthProvider = ({ children }: AuthProviderProps): ReactElement => {
 
   useEffect(() => {
     if (tokens) {
-      console.log('Tokens available:', tokens);
       router.replace('/(tabs)/dashboard'); // Redirect to dashboard if tokens are available
     }
   }, [tokens]);
