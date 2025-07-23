@@ -37,12 +37,10 @@ const textVariants = cva('text-foreground', {
 
 const TextClassContext = React.createContext<string | undefined>(undefined);
 
-function Text({
-  className,
-  variant,
-  color,
-  ...props
-}: React.ComponentPropsWithoutRef<typeof UITextView> & VariantProps<typeof textVariants>) {
+const Text = React.forwardRef<
+  React.ElementRef<typeof UITextView>,
+  React.ComponentPropsWithoutRef<typeof UITextView> & VariantProps<typeof textVariants>
+>(function Text({ className, variant, color, ...props }, ref) {
   const textClassName = React.useContext(TextClassContext);
   return (
     <UITextView
@@ -50,6 +48,5 @@ function Text({
       {...props}
     />
   );
-}
-
+});
 export { Text, TextClassContext, textVariants };

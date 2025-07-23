@@ -9,6 +9,8 @@ module.exports = {
   theme: {
     extend: {
       colors: {
+        brandLight: '#f0f1e5',
+        brandDark: '#060503',
         border: withOpacity('border'),
         input: withOpacity('input'),
         ring: withOpacity('ring'),
@@ -45,6 +47,16 @@ module.exports = {
       },
       borderWidth: {
         hairline: hairlineWidth(),
+      },
+      fontFamily: {
+        sofia: ['Sofia'],
+        sofiaBold: ['SofiaBold'],
+        sofiaLight: ['SofiaLight'],
+        system: platformSelect({
+          ios: 'sofia',
+          android: 'sofia',
+          default: 'sofia',
+        }),
       },
     },
   },
