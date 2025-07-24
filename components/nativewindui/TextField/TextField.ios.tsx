@@ -68,7 +68,7 @@ const TextField = React.forwardRef<TextFieldRef, TextFieldProps>(
           <TextInput
             ref={inputRef}
             editable={editable}
-            className={cn('text-foreground flex-1 px-2.5 py-3 text-[17px]', className)}
+            className={cn('flex-1 px-2.5 py-3 text-[17px] text-foreground', className)}
             onChangeText={onChangeText}
             value={value}
             clearButtonMode="while-editing"

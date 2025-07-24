@@ -22,7 +22,7 @@ export default function AuthIndexScreen() {
   return (
     <>
       <SafeAreaView style={{ flex: 1 }}>
-        <View className="ios:justify-end bg-brandLight flex-1 justify-center gap-4 px-8 py-4">
+        <View className="ios:justify-end flex-1 justify-center gap-4 bg-brandLight px-8 py-4 dark:bg-brandDark">
           <View className="items-center">
             <Image
               source={LOGO_SOURCE}
@@ -31,7 +31,7 @@ export default function AuthIndexScreen() {
             />
           </View>
           <View className="ios:pb-5 ios:pt-2 pb-2">
-            <Text className="font-sofia text-center text-3xl">Ad Paws</Text>
+            <Text className="text-center font-sofia text-3xl">Ad Paws</Text>
             <TypingLoop />
           </View>
           <Link href="/auth/(create-account)" asChild>

@@ -1,12 +1,13 @@
 import { Feather } from '@expo/vector-icons';
-import { Text, View, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
+import { Text } from './nativewindui/Text';
 
 export const BackButton = ({ onPress }: { onPress: () => void }) => {
   return (
-    <View style={styles.backButton}>
+    <View className="flex-row items-center">
       <Feather name="chevron-left" size={16} color="#007AFF" />
-      <Text style={styles.backButtonText} onPress={onPress}>
-        Back
+      <Text className="pt-2font-sofia" style={styles.backButtonText} onPress={onPress}>
+        Regresar
       </Text>
     </View>
   );
@@ -14,10 +15,8 @@ export const BackButton = ({ onPress }: { onPress: () => void }) => {
 const styles = StyleSheet.create({
   backButton: {
     flexDirection: 'row',
-    paddingLeft: 20,
   },
   backButtonText: {
     color: '#007AFF',
-    marginLeft: 4,
   },
 });

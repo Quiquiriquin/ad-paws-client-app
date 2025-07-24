@@ -1,4 +1,4 @@
-import { useQuery } from '@apollo/client';
+import { useLazyQuery, useQuery } from '@apollo/client';
 import { useEffect } from 'react';
 import { View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -10,11 +10,19 @@ import { GET_USER_DOGS } from '~/lib/queries/dog.queries';
 
 export default function Mascotas() {
   const { user } = useAuth();
-  const { data, loading, error } = useQuery(GET_USER_DOGS, {
-    variables: {
-      ownerId: parseInt(user?.id || '0', 10), // Assuming user has an id property
-    },
-  });
+  const [getOwnerDogs, { data, loading, error }] = useLazyQuery(GET_USER_DOGS);
+
+  useEffect(() => {
+    console.log('Fetching user dogs for user:', user);
+    if (user?.id) {
+      getOwnerDogs({
+        variables: {
+          ownerId: parseInt(user.id, 10), // Ensure the id is a number
+        },
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
 
   useEffect(() => {
     if (data) {
@@ -39,14 +47,16 @@ export default function Mascotas() {
   }
 
   return (
-    <View className="bg-brandLight flex-1">
+    <View className="flex-1 bg-brandLight dark:bg-brandDark">
       <SafeAreaView className="p-4">
-        <Text variant="title2" className="font-sofia mb-6">
+        <Text variant="title2" className="mb-6 font-sofia">
           Mascotas
         </Text>
         <GridList>
           {data?.dogsByOwner?.map((dog: any) => <DogCard key={dog.id} dog={dog} />) || (
-            <Text variant="body">No tienes mascotas registradas.</Text>
+            <Text variant="body" className="font-sofia">
+              No tienes mascotas registradas.
+            </Text>
           )}
         </GridList>
       </SafeAreaView>

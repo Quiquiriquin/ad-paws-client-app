@@ -46,7 +46,7 @@ const androidRootVariants = cva('overflow-hidden', {
   },
 });
 
-const buttonTextVariants = cva('font-medium font-sofia', {
+const buttonTextVariants = cva('font-medium', {
   variants: {
     variant: {
       primary: 'text-white',
