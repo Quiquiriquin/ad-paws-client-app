@@ -3,14 +3,14 @@ import {
   useState,
   useEffect,
   useContext,
-  ReactNode,
-  ReactElement,
-  useCallback,
+  type ReactNode,
+  type ReactElement,
+  useRef,
 } from 'react';
 import * as SecureStore from 'expo-secure-store';
 import { useLazyQuery } from '@apollo/client';
 import { USER } from '~/lib/queries/user.queries';
-import { router } from 'expo-router';
+import { router, useSegments } from 'expo-router';
 
 type UserData = {
   id: string;
@@ -33,6 +33,7 @@ type AuthContextType = {
   loading: boolean;
   assignUser: () => Promise<void>;
   tokens: Tokens;
+  setUser: (user: User | null) => void;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -45,74 +46,133 @@ export const AuthProvider = ({ children }: AuthProviderProps): ReactElement => {
   const [tokens, setTokens] = useState<Tokens>(null);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const segments = useSegments();
 
-  const [fetchUser, { data: userInfo, loading: userLoading, error: errorFetchingUser }] =
-    useLazyQuery<{ user: UserData }>(USER, { fetchPolicy: 'network-only' });
+  // Refs para evitar dependencias circulares
+  const hasInitialized = useRef(false);
+  const isNavigating = useRef(false);
 
-  // Load token on mount
-  useEffect(() => {
-    const loadTokensAndUser = async () => {
-      setLoading(true);
-      const accessToken = await SecureStore.getItemAsync('accessToken');
-      if (accessToken) {
-        setTokens({ accessToken });
-        await fetchUser();
+  const [fetchUser] = useLazyQuery<{ user: UserData }>(USER, {
+    fetchPolicy: 'network-only',
+    onCompleted: (data) => {
+      if (data.user && tokens?.accessToken) {
+        setUser({
+          token: tokens.accessToken,
+          ...data.user,
+        });
       }
       setLoading(false);
-    };
-    loadTokensAndUser();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // Set user info after fetching user
-  useEffect(() => {
-    if (userInfo && tokens?.accessToken) {
-      setUser({
-        token: tokens.accessToken,
-        ...userInfo.user,
-      });
-    }
-  }, [userInfo, tokens]);
-
-  // Navigate to dashboard when login completes
-  useEffect(() => {
-    if (tokens?.accessToken && user && !loading && !userLoading) {
-      router.replace('/(tabs)/dashboard');
-    }
-  }, [tokens, user, loading, userLoading]);
-
-  const assignUser = useCallback(async () => {
-    if (tokens?.accessToken) {
-      await fetchUser();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tokens]);
-
-  useEffect(() => {
-    if (errorFetchingUser) {
-      console.error('Error fetching user:', errorFetchingUser);
-      setUser(null);
+    },
+    onError: (error) => {
+      console.error('Error fetching user:', error);
       setTokens(null);
-      router.replace('/auth'); // Redirect to auth if there's an error fetching user
+      setUser(null);
+      setLoading(false);
+    },
+  });
+
+  // 1. Inicialización única al montar
+  useEffect(() => {
+    if (hasInitialized.current) return;
+
+    const initializeAuth = async () => {
+      try {
+        const accessToken = await SecureStore.getItemAsync('accessToken');
+
+        if (accessToken) {
+          setTokens({ accessToken });
+          // Llamar fetchUser solo si tenemos token
+          fetchUser();
+        } else {
+          setLoading(false);
+        }
+      } catch (error) {
+        console.error('Error initializing auth:', error);
+        setLoading(false);
+      }
+    };
+
+    hasInitialized.current = true;
+    initializeAuth();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Sin dependencias
+
+  // 2. Navegación basada en estado
+  useEffect(() => {
+    if (loading || isNavigating.current) return;
+
+    const inAuthGroup = segments[0] === 'auth';
+    const inTabsGroup = segments[0] === '(tabs)';
+    const isOnRoot = !segments.length;
+
+    // Usuario autenticado con datos
+    if (tokens?.accessToken && user) {
+      if (inAuthGroup || isOnRoot) {
+        isNavigating.current = true;
+        router.replace('/(tabs)/dashboard');
+        setTimeout(() => {
+          isNavigating.current = false;
+        }, 100);
+      }
+      return;
     }
-  }, [errorFetchingUser]);
+
+    // Usuario no autenticado
+    if (!tokens?.accessToken) {
+      if (inTabsGroup || isOnRoot) {
+        isNavigating.current = true;
+        router.replace('/auth');
+        setTimeout(() => {
+          isNavigating.current = false;
+        }, 100);
+      }
+      return;
+    }
+
+    // Usuario autenticado pero sin datos (esperando)
+    // No hacer nada, esperar a que se carguen los datos
+  }, [tokens, user, loading, segments]);
+
+  const assignUser = async () => {
+    if (tokens?.accessToken && !loading) {
+      setLoading(true);
+      fetchUser();
+    }
+  };
 
   const login = async (accessToken: string) => {
-    setLoading(true);
-    await SecureStore.setItemAsync('accessToken', accessToken);
-    setTokens({ accessToken });
-    await fetchUser();
-    // if the above fetchUser is asynchronous/does not immediately update, the userInfo effect will run
-    setLoading(false);
+    try {
+      setLoading(true);
+      isNavigating.current = false;
+
+      await SecureStore.setItemAsync('accessToken', accessToken);
+      setTokens({ accessToken });
+
+      // fetchUser se llamará automáticamente cuando tokens cambie
+      fetchUser();
+    } catch (error) {
+      console.error('Login error:', error);
+      setTokens(null);
+      setUser(null);
+      setLoading(false);
+    }
   };
 
   const logout = async () => {
-    setLoading(true);
-    await SecureStore.deleteItemAsync('accessToken');
-    setTokens(null);
-    setUser(null);
-    setLoading(false);
-    router.replace('/auth');
+    try {
+      setLoading(true);
+      isNavigating.current = false;
+
+      await SecureStore.deleteItemAsync('accessToken');
+      setTokens(null);
+      setUser(null);
+
+      router.replace('/auth');
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -121,9 +181,10 @@ export const AuthProvider = ({ children }: AuthProviderProps): ReactElement => {
         user,
         login,
         logout,
-        loading: loading || userLoading,
+        loading,
         assignUser,
         tokens,
+        setUser,
       }}>
       {children}
     </AuthContext.Provider>

@@ -84,24 +84,12 @@ export default function DogImage({
       if (!result.canceled && result.assets[0]) {
         setUploadLoading(true);
         const asset = result.assets[0];
-        console.log('Selected image asset:', asset);
-
-        // Crear el archivo usando FormData (más compatible con React Native)
-        const file = {
-          uri: asset.uri,
-          name: asset.fileName || 'photo.jpg',
-          type: asset.mimeType || 'image/jpeg',
-        };
-
-        console.log('File object:', file);
 
         try {
           const response = await uploadImageWithFetch(
             Number.parseInt(data?.dogById?.id || '0', 10),
             asset
           );
-
-          console.log('Upload response:', response);
 
           if (response.data?.uploadDogPicture) {
             Toast.show({
