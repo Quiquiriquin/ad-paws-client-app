@@ -4,10 +4,11 @@ import { View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Text } from '~/components/nativewindui/Text';
 import { useAuth } from '~/context/AuthContext';
+import { useColorScheme } from '~/lib/useColorScheme';
 
 export default function Index() {
   const { assignUser, user } = useAuth();
-
+  const { colorScheme } = useColorScheme();
   useEffect(() => {
     // Solo llamar assignUser si no tenemos usuario
     if (!user) {
@@ -23,7 +24,12 @@ export default function Index() {
           Actividad reciente
         </Text>
         <View className="h-full items-center justify-center">
-          <AntDesign color="white" name="hourglass" size={36} className="dark:text-white! mb-4" />
+          <AntDesign
+            color={colorScheme === 'dark' ? 'white' : 'black'}
+            name="hourglass"
+            size={36}
+            className="dark:text-white! mb-4"
+          />
           <Text variant="body" className="font-sofia">
             Aquí aparecerá tu actividad reciente.
           </Text>

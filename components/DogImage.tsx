@@ -183,7 +183,7 @@ export default function DogImage({
   };
 
   return (
-    <View className="relative mx-auto mb-4 mt-4 h-[175px] w-[175px] flex-row justify-center">
+    <View className="relative mx-auto mt-4 h-[175px] w-[175px] flex-row justify-center">
       {showImage ? (
         <>
           {!imageLoaded && (
@@ -192,8 +192,8 @@ export default function DogImage({
           <Image
             source={{ uri: data.dogById.imageUrl }}
             style={{
-              width: 175,
-              height: 175,
+              width: 150,
+              height: 150,
               borderRadius: 10,
             }}
             className="z-10"

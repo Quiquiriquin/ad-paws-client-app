@@ -1,31 +1,25 @@
 import { KeyboardTypeOptions, Keyboard } from 'react-native';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Form, FormItem, FormSection } from '../nativewindui/Form';
 import { Controller, useFormContext } from 'react-hook-form';
 import { TextField } from '../nativewindui/TextField';
-import { Text } from '../nativewindui/Text';
+
 import { Picker, PickerItem } from '../nativewindui/Picker';
 import { Sheet, useSheetRef } from '../nativewindui/Sheet';
 import { BottomSheetView } from '@gorhom/bottom-sheet';
-import { Button } from '../nativewindui/Button';
-import { useMutation } from '@apollo/client';
-import Toast from 'react-native-toast-message';
-import { UPDATE_USER } from '~/lib/mutations/user.mutations';
-import { useAuth } from '~/context/AuthContext';
+
+export const genderSelectableOptions = [
+  { label: 'Masculino', value: 'Male' },
+  { label: 'Femenino', value: 'Female' },
+  { label: 'Prefiero no decirlo', value: 'Other' },
+];
+
 export default function UserForm({ user }: { user?: any }) {
-  const { control, reset, formState, getValues } = useFormContext();
-  const { setUser } = useAuth();
+  const { control } = useFormContext();
   const bottomSheetModalRef = useSheetRef();
-  const [updateUserMutation, { data, error }] = useMutation(UPDATE_USER);
   const [selectedPicker, setSelectedPicker] = useState<string | null>(null);
   const [pickerOptions, setPickerOptions] = useState<{ label: string; value: string }[]>([]);
   const [currentValue, setCurrentValue] = useState<string | undefined>(undefined);
-
-  const genderSelectableOptions = [
-    { label: 'Masculino', value: 'Male' },
-    { label: 'Femenino', value: 'Female' },
-    { label: 'Prefiero no decirlo', value: 'Other' },
-  ];
 
   const inputs = [
     { name: 'name', label: 'Nombre' },
@@ -53,73 +47,6 @@ export default function UserForm({ user }: { user?: any }) {
     setCurrentValue(matched?.value);
     bottomSheetModalRef.current?.present();
   };
-
-  const parsePickerValue = (inputName: string, label: string): string => {
-    if (inputName === 'gender') {
-      return genderSelectableOptions.find((option) => option.label === label)?.value || '';
-    }
-    return label;
-  };
-
-  const submit = async () => {
-    const values = getValues();
-    const updatedUser = {
-      name: values.name,
-      email: values.email,
-      phone: values.phone,
-      lastname: values.lastname,
-      gender: parsePickerValue('gender', values.gender),
-    };
-    await updateUserMutation({
-      variables: {
-        input: {
-          ...updatedUser,
-        },
-      },
-    });
-    // handle updatedUser as needed
-  };
-
-  useEffect(() => {
-    reset({
-      name: user?.name || '',
-      email: user?.email || '',
-      phone: user?.phone || '',
-      lastname: user?.lastname || '',
-      gender: user?.gender
-        ? genderSelectableOptions.find((option) => option.value === user.gender)?.label || ''
-        : '',
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
-    if (data) {
-      console.log('User updated successfully:', data);
-      Toast.show({
-        type: 'success',
-        text1: 'Información actualizada',
-        text2: `Tu información ha sido actualizada correctamente.`,
-      });
-      reset({
-        name: data.updateUser.name,
-        email: data.updateUser.email,
-        phone: data.updateUser.phone,
-        lastname: data.updateUser.lastname,
-        gender:
-          genderSelectableOptions.find((option) => option.value === data.updateUser.gender)
-            ?.label || '',
-      });
-      setUser({
-        ...user,
-        ...data.updateUser,
-      });
-    }
-    if (error) {
-      console.error('Error updating user:', error);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data, error, reset]);
 
   return (
     <>
@@ -157,11 +84,6 @@ export default function UserForm({ user }: { user?: any }) {
           ))}
         </FormSection>
       </Form>
-      {formState.isDirty && (
-        <Button className="mt-6" size="lg" onPress={submit}>
-          <Text>Guardar cambios</Text>
-        </Button>
-      )}
       <Sheet ref={bottomSheetModalRef} snapPoints={[500]}>
         <BottomSheetView className="px-4">
           {selectedPicker && (

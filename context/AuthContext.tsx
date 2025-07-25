@@ -15,6 +15,10 @@ import { router, useSegments } from 'expo-router';
 type UserData = {
   id: string;
   name: string;
+  email: string;
+  phone: string;
+  lastname: string;
+  gender: string;
   // Add other user fields here
 };
 

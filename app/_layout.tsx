@@ -12,6 +12,7 @@ import FloatingLogoutButton from '~/components/FloatingLogoutButton';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import Toast from 'react-native-toast-message';
+import CustomToast from '~/components/CustomToast';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -37,7 +38,7 @@ export default function RootLayout() {
                 />
                 <Slot />
                 <FloatingLogoutButton />
-                <Toast />
+                <CustomToast />
               </AuthProvider>
             </ApolloWrapper>
           </BottomSheetModalProvider>
